@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lil House</title>
+
+
+    <!-- jQuery files-->
+    <script src="js/JQuery/jquery-3.5.1.js"></script>
+    <script src="js/Bootstrap/bootstrap.min.js"></script>
+
+    <!-- Css files-->
+    <link rel="stylesheet" href="css/Boostrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/commonStyling.css" />
+
+    <!-- Firebase Reference-->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-storage.js"></script>
+
+    <script src="firebase-key.js"></script>
+
+    <!--Vue file--> 
+    <script src="js/Vue/vue.js"></script>
+    <script src="js/vueMaterial.js"></script>
+    
+    <!--Google Icons-->
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
+
+
+    <style>
+        @media screen and (min-width: 1200px) {
+            .input-group {
+                width: 400px;
+            }
+        }
+
+        @media screen and (min-width: 600px) and (max-width: 1200px) {
+            .input-group {
+                width: 300px;
+            }
+        }
+
+        .flexContainer {
+            width: 100%;
+            height: auto;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+
+        #container {
+            margin: 2%;
+        }
+
+        #previewSection {
+            background-color: #ebebeb;
+            border-top: 0.4px solid black;
+            border-bottom: 0.4px solid black;
+            padding-bottom: 20px;
+        }
+
+        .previewDivs {
+            position: relative;
+            animation-name: MoveUpDown;
+            animation-duration: 4s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        .previewDelete {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        .previewDelete:hover {
+            background-color: gray;
+        }
+
+        .imgs {
+            max-width: 500px;
+            height: auto;
+        }
+
+        @keyframes MoveUpDown {
+
+            0%,
+            100% {
+                top: 0px;
+            }
+
+            50% {
+                top: 20px;
+            }
+        }
+    </style>
+
+    <script>
+        var previewImgs = [];
+        var errorText;
+        var galleryImgs = [];
+        var storageRef = storage.ref();
+        var galleryCollection = firestore.collection("gallery");
+
+        $(document).ready(function () {
+            $("#navbar-holder").load("navigationbar.html");
+
+            $("#imageUpload").change(function () {
+                preview.SetPreviews();
+            })
+
+            $("#btnUpload").click(function () {
+                preview.UploadToFirebase();
+            })
+
+            console.log(typeof("a"));
+        });
+
+
+
+
+        function RemovePreview(e) {
+            //as index of img is set as the parent div's id, get the index number
+            let indexToRemove = e.parentElement.id;
+
+            //remove the file from files
+            preview.DeleteSelectedPreview(indexToRemove);
+        }
+
+    </script>
+</head>
+
+<!-- check the Comments for more info -->
+
+<body>
+    <div id="navbar-holder"></div>
+
+    <div id="container">
+
+
+        <div class="input-group">
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="imageUpload" aria-describedby="inputGroupFileAddon01"
+                    accept="image/*" multiple>
+                <label class="custom-file-label" for="imageUpload">Choose File</label>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-outline-success" id="btnUpload" type="submit">Upload</button>
+            </div>
+        </div>
+
+        <br />
+
+        <section id="previewSection" class="flexContainer previewVue" v-if="previewImgs.length">
+            <div v-for="(previewImg, index) in previewImgs" :key="previewImg.imgUrl" class="previewDivs" v-bind:id="index">
+                <img class="previewDelete" src="icons/delete.png" onclick="RemovePreview(this)">
+                <img v-bind:src="previewImg.imgUrl" v-bind:title="previewImg.name" class="img-thumbnail imgs">
+            </div>
+        <p class="alert alert-danger previewVue">{{errorText}}</p>
+
+        </section>
+
+        <br />
+
+
+        <section id="gallerySection" class="flexContainer">
+            <div v-for="galleryImg in galleryImgs" :key="galleryImg.id" v-bind:id="galleryImg.id">
+                <img v-bind:src="galleryImg.imgUrl" class="img-thumbnail imgs">
+            </div>
+        </section>
+
+    </div>
+
+    <template>
+        <div>
+          <md-progress-spinner md-mode="determinate" :md-value="amount"></md-progress-spinner>
+          <md-progress-spinner class="md-accent" md-mode="determinate" :md-value="amount"></md-progress-spinner>
+          <div>
+            <input type="range" v-model.number="amount"> {{ amount }}%
+          </div>
+        </div>
+      </template>
+      
+      <script>
+        export default {
+          name: 'ProgressSpinnerDeterminate',
+          data: () => ({
+            amount: 20
+          })
+        }
+      </script>
+      
+      <style lang="scss" scoped>
+        .md-progress-spinner {
+          margin: 24px;
+        }
+      </style>
+
+    <!-- Vue JS -->
+    <script>
+
+        var errorImgs=[];
+        var preview = new Vue({
+            el: "#previewSection",
+            data: {
+                previewImgs: previewImgs,
+                errorText: errorText,
+                errorImgs:errorImgs
+            },
+            methods: {
+                SetPreviews: function () {
+                    var files = document.getElementById("imageUpload").files;
+                    this.previewImgs = [];
+                    for (let file of files) {
+                        this.previewImgs.push({
+                            imgUrl: URL.createObjectURL(file),
+                            imgName: file.name,
+                        })
+                    }
+                },
+                DeleteSelectedPreview: function (indexToDelete) {
+                    //remove 1 item at that index and remove the image URL from memory
+                    URL.revokeObjectURL(this.previewImgs[indexToDelete].imgUrl)
+                    this.previewImgs.splice(indexToDelete, 1);
+                },
+                UploadToFirebase: async function () {
+                    this.errorText = null;
+                    await this.previewImgs.forEach(async (img, index,array) => {
+
+                        var galleryAlbum = "Family";
+
+                        let imgPath = "images/" + galleryAlbum + "/" + img.imgName;
+                        let imagesRef = storageRef.child(imgPath);
+                        let blob = await fetch(img.imgUrl).then(r => r.blob());
+
+                        //upload the image itself to cloud storage
+                        imagesRef.put(blob).then(function (snapshot) {
+
+                            //upload the image path to firestore
+                            galleryCollection.doc(galleryAlbum).collection("Images").doc().set({
+                                imgPath: imgPath
+                            }).then(() => {
+                                preview.DeleteSelectedPreview(index);
+                            });
+
+                        });
+                    });
+                }
+            }
+        });
+
+
+        var gallery = new Vue({
+            el: "#gallerySection",
+            data: {
+                galleryImgs: galleryImgs
+            },
+            methods: {
+                ReadRealTimeGallery: function () {
+
+                    galleryCollection.onSnapshot(snapshot => {
+
+                        snapshot.docs.map(doc => {
+                            var imagePath = doc.data().imgPath;
+                            console.log(doc.data().imgPath)
+
+                            storageRef.child(imagePath).getDownloadURL().then(function (url) {
+                                // This can be downloaded directly:
+                                var xhr = new XMLHttpRequest();
+                                xhr.responseType = 'blob';
+                                xhr.onload = function (event) {
+                                    var blob = xhr.response;
+                                };
+                                xhr.open('GET', url);
+                                xhr.send();
+
+                                this.galleryImgs.push({
+                                    id: doc.id,
+                                    imgUrl: url
+                                });
+                            })
+                        })
+                    });
+                },
+                GetAllGalleryAlbums: function () {
+                    galleryCollection.onSnapshot(snapshot => {
+                        snapshot.docs.map(doc => {
+                            console.log("updated");
+                        })
+                    })
+                }
+            },
+            beforeMount() {
+                this.GetAllGalleryAlbums()
+            }
+
+        })
+
+    </script>
+
+
+</body>
+
+</html>

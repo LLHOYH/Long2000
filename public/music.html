@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lil House</title>
+
+
+    <!-- jQuery files-->
+    <script src="js/JQuery/jquery-3.5.1.js"></script>
+    <script src="js/Bootstrap/bootstrap.min.js"></script>
+
+    <!-- Css files-->
+    <link rel="stylesheet" href="css/Boostrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/commonStyling.css" />
+
+    <!-- Firebase Reference-->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
+
+    <script src="firebase-key.js"></script>
+
+    <!--Vue file-->
+    <script src="js/Vue/vue.js"></script>
+
+
+    <style>
+        li{
+            display: flex;
+        }
+        iframe{
+            justify-content: center;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $("#navbar-holder").load("navigationbar.html");
+        });
+
+        var musicCollection = firestore.collection("musics");
+        console.log(musicCollection);
+
+        var musics = [];
+
+        musicCollection.get().then(snapshot => {
+            snapshot.forEach(doc => {
+                var data = doc.data();
+                musics.push({
+                    musicID: doc.id,
+                    musicName: data.Title,
+                    url: data.Url
+                })
+            });
+        });
+
+    </script>
+</head>
+
+<!-- check the Comments for more info -->
+
+<body>
+    <div id="navbar-holder"></div>
+
+    
+    <!-- <canvas id="bgCanvas" class="container-fluid"></canvas> -->
+
+
+        <!--Background file-->
+        <!-- <script src="js/night-background.js"></script>
+        <link rel="stylesheet" href="css/night-background.css"> -->
+
+    <div id="musicSection" class="mt-3">
+        <ul class="container" style="list-style: none;">
+            <li v-for="music in musics" class="mt-3">
+                <iframe height="576" width="1224" v-bind:src="music.url" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            </li>
+        </ul>
+    </div>
+
+
+
+
+    <!-- Vue JS -->
+    <script>
+        console.log(musics);
+        var musiclist = new Vue({
+            el: "#musicSection",
+            data: {
+                musics: musics
+            }
+        })
+    </script>
+
+
+</body>
+
+</html>
