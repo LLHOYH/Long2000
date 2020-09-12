@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lil House</title>
+
+    <!-- jQuery files-->
+    <script src="../shared/js/JQuery/jquery-3.5.1.js"></script>
+    <script src="../shared/js/Bootstrap/bootstrap.min.js"></script>
+
+    <!-- Css files-->
+    <link rel="stylesheet" href="../shared/css/Boostrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="../shared/css/commonStyling.css" />
+    <link rel="stylesheet" href="gallery-style.css">
+
+    <!-- Firebase Reference-->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-storage.js"></script>
+    
+    <!--Vue file-->
+    <script src="../shared/js/Vue/vue.js"></script>
+
+    <!-- Navigation Bar -->
+    <script type="module" src="../shared/navigation-bar/navigation-vue.js"></script>
+    <link rel="stylesheet" href="../shared/navigation-bar/navigationbar.css">
+    
+    <!--Google Icons-->
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
+
+</head>
+
+<!-- check the Comments for more info -->
+
+<body>
+    <div id="navbar-holder">
+        <nav-bar></nav-bar>
+    </div>
+
+    <div id="container">
+
+        <section id="uploadSection" class="input-group">
+
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="imageUpload" aria-describedby="inputGroupFileAddon01"
+                    accept="image/*" multiple @change="OnFilesChange()">
+                <label class="custom-file-label" for="imageUpload">Choose File</label>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-outline-success" id="btnUpload" type="submit" @click="SubmitClicked()">Upload</button>
+            </div>
+        </section>
+
+        <br />
+
+        <section id="previewSection" class="flex-list-center previewVue" v-if="previewImgs.length">
+            <div v-for="previewImg in previewImgs" :key="previewImg.imgUrl" class="previewDivs"
+                v-bind:id="previewImg.id">
+                <img class="previewDelete" src="../shared/icons/delete.png" @click="RemovePreview($event)">
+                <img v-bind:src="previewImg.imgUrl" v-bind:title="previewImg.name" class="img-thumbnail imgs">
+                <div v-if="previewImg.imgUploading" class="spinnerContainer">
+                    <div v-if="!previewImg.uploadError" class="spinner"></div>
+                    <p v-if="!previewImg.uploadError">{{previewImg.uploadProgress}}%</p>
+                    <p v-if="previewImg.uploadError" class="errorMsg">Error Uploading</p>
+                </div>
+
+            </div>
+        </section>
+
+        <br />
+
+        <!-- <section id="gallerySection" class="flexContainer">
+            <div v-for="galleryImg in galleryImgs" :key="galleryImg.id" v-bind:id="galleryImg.id">
+                <img v-bind:src="galleryImg.imgUrl" class="img-thumbnail imgs">
+            </div>
+        </section> -->
+
+        <h4>Your Gallery Albums</h4>
+        <section id="galleryAlbumSection" class="flex-list-center">
+            <div v-for="album in albums" :key="album.albumName" v-bind:id="album.albumName" class="flex-column-1 albumDiv" @click="OpenAlbum(album.albumName, $event)">
+                <div class="albumCoverImgsContainer">
+                    <div class="albumNameContainer">
+                        <p class="albumName">{{album.albumName}}</p>
+                    </div>
+                    <img v-bind:src="album.albumImgCover" class="img-thumbnail albumCoverImgs" alt="No Image..." onerror="">
+                </div>
+                <div class="border-bottom"></div>
+                <p>{{album.albumDate}}</p>
+                <p>{{album.albumDescription}}</p>
+                <p>Number of Photos: {{album.imgNum}}</p>
+                
+                <div v-show="album.isShowingImages">
+                    <div v-for="albumImage in album.albumImages" :key="albumImage.id" v-bind:id="albumImage.id">
+                        <img v-bind:src="albumImage.imgUrl" class="img-thumbnail imgs">
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+
+
+    <!-- Vue JS -->
+    <script type="module"  src="gallery-vue.js"></script>
+
+</body>
+
+</html>

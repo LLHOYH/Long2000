@@ -15,6 +15,22 @@ function Ball(x,y, velX, velY, color,size){
   this.size = size;
 }
 
+const b={c:30};
+const a=b;
+a.c=20;
+console.log(b);
+
+function makeFunc() {
+    var name = "Mozilla";
+    function displayName() {
+        alert(name);
+    }
+    return displayName;
+}
+
+var myFunc = makeFunc();
+myFunc();
+
 Ball.prototype.draw=function(){
     ctx.beginPath();
     ctx.fillStyle=this.color;
