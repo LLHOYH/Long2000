@@ -3,21 +3,48 @@ import { firestore, storage } from "../shared/firebase/firebase-key.js";
 var storageRef = storage.ref();
 var galleryCollection = firestore.collection("gallery");
 
-var previewImgs = [];
-
 const sub_collection="Images";
 
+var albumNames=[];
+var selectedAlbum;
+
 var upload=new Vue({
-    el:"#uploadSection",
+	el:"#uploadSection",
+	data:{
+		albumNames:albumNames,
+		selectedAlbum:selectedAlbum
+	},
     methods:{
+		LoadAlbums:function(){
+			galleryCollection.get().then((result)=>{
+				result.docs.forEach((doc,index)=>{
+					if(index===0)
+					this.selectedAlbum=doc.id;
+					albumNames.push(doc.id);
+				})
+				if(albumNames.length>0)
+					this.selectedAlbum=albumNames[0];
+				else
+					this.selectedAlbum="No Album Yet";
+			});
+		},
+		OnAlbumChange:function(albumName){
+			this.selectedAlbum=albumName;
+		},
         OnFilesChange:function(){
             preview.SetPreviews();
         },
         SubmitClicked:function(){
             preview.UploadToFirebase();
-        }
-    }
+		},
+	},	
+	beforeMount(){
+		this.LoadAlbums();
+	}
 })
+
+
+var previewImgs = [];
 
 var preview = new Vue({
 	el: "#previewSection",

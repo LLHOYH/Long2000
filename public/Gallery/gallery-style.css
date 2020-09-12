@@ -160,9 +160,38 @@
     }
 }
 
+
+
+/* Upload Section Css */
+.dropdown-input{
+    width:80%;
+}
+
+.right-inner-addon {
+    position: relative;
+}
+.right-inner-addon input {
+    padding-right: 30px;
+}
+.right-inner-addon img {
+    position: absolute;
+    right: 10px;
+    top: 45px;
+}
+
+.dropdown-item:active{
+    background-color: #dc3545;
+}   
+
+
+
+
+
+
+
 /* Album Section Css */
 .albumDiv{
-    margin:20px;
+    margin: 20px 40px 20px 0;
     padding:3px;
     border:0.7px solid #5fb37f;
     border-radius: 3px;
@@ -171,10 +200,6 @@
     -webkit-box-shadow: 0 0 15px #5fb37f;
     box-shadow: 0 0 15px #5fb37f;
 }
-
-
-
-
 
 .albumCoverImgsContainer{
     overflow: hidden;

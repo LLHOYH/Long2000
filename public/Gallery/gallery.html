@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lil House</title>
 
-    <!-- jQuery files-->
+    <!-- JS files-->
     <script src="../shared/js/JQuery/jquery-3.5.1.js"></script>
-    <script src="../shared/js/Bootstrap/bootstrap.min.js"></script>
+    <script src="../shared/js/Bootstrap/bootstrap.bundle.min.js"></script>
+
+
 
     <!-- Css files-->
     <link rel="stylesheet" href="../shared/css/Boostrap/bootstrap.min.css" />
@@ -50,6 +52,29 @@
                 <label class="custom-file-label" for="imageUpload">Choose File</label>
             </div>
             <div class="input-group-append">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      {{selectedAlbum}}
+                    </button>
+                    <div class="dropdown-menu">
+                        <!-- <a class="dropdown-item" href="#">albumName</a>
+                        <a class="dropdown-item" href="#">ds</a> -->
+                      <a v-for="albumName in albumNames" class="dropdown-item" @click="OnAlbumChange(albumName)">{{albumName}}</a>
+                      
+                      <div class="dropdown-divider "></div>
+
+                      
+                      <form class="dropdown-item">
+                        <div class="form-group right-inner-addon">
+                          <label for="newAlbumInput" id="newAlbumLabel" class="font-weight-bold col-form-label">Create New Album:</label>
+                            <input type="text" class="form-control form-control-sm" id="newAlbumInput">
+                            <img role="img" src="../shared/bootstrap_icons/arrow-up-circle.svg" />
+                        </div>
+                        
+                      </form>
+
+                    </div>
+                  </div>
                 <button class="btn btn-outline-success" id="btnUpload" type="submit" @click="SubmitClicked()">Upload</button>
             </div>
         </section>
