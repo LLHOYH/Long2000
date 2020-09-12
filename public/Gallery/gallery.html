@@ -41,6 +41,7 @@
 
     <div id="container">
 
+        <h4>Upload Images</h4>
         <section id="uploadSection" class="input-group">
 
             <div class="custom-file">
@@ -83,13 +84,13 @@
                 <div class="albumCoverImgsContainer">
                     <div class="albumNameContainer">
                         <p class="albumName">{{album.albumName}}</p>
+                        <p class="albumImgNum" v-if="album.imgNum">{{album.imgNum}}</p>
                     </div>
-                    <img v-bind:src="album.albumImgCover" class="img-thumbnail albumCoverImgs" alt="No Image..." onerror="">
+                    <img v-bind:src="album.albumImgCover" class="img-thumbnail albumCoverImgs" alt="Image Could Not Load..." onerror="this.src='../shared/images/no_image_yet.png'">
                 </div>
                 <div class="border-bottom"></div>
                 <p>{{album.albumDate}}</p>
                 <p>{{album.albumDescription}}</p>
-                <p>Number of Photos: {{album.imgNum}}</p>
                 
                 <div v-show="album.isShowingImages">
                     <div v-for="albumImage in album.albumImages" :key="albumImage.id" v-bind:id="albumImage.id">
