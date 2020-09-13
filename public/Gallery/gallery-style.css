@@ -171,12 +171,12 @@
     position: relative;
 }
 .right-inner-addon input {
-    padding-right: 30px;
+    padding-right: 25px;
 }
 .right-inner-addon img {
     position: absolute;
-    right: 10px;
-    top: 45px;
+    right: 30px;
+    top: 11px;
 }
 
 .dropdown-item:active{

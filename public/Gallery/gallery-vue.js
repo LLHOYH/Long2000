@@ -7,14 +7,17 @@ const sub_collection="Images";
 
 var albumNames=[];
 var selectedAlbum;
+var newAlbumName;
 
 var upload=new Vue({
 	el:"#uploadSection",
 	data:{
-		albumNames:albumNames,
-		selectedAlbum:selectedAlbum
+		albumNames,
+		selectedAlbum,
+		newAlbumName
 	},
     methods:{
+
 		LoadAlbums:function(){
 			galleryCollection.get().then((result)=>{
 				result.docs.forEach((doc,index)=>{
@@ -28,8 +31,15 @@ var upload=new Vue({
 					this.selectedAlbum="No Album Yet";
 			});
 		},
-		OnAlbumChange:function(albumName){
+		OnAlbumChange:function(albumName,event){
+			event.preventDefault();
 			this.selectedAlbum=albumName;
+		},
+		OnAddingNewAlbumClick:function(event){
+			console.log(this.newAlbumName.trim());
+			event.preventDefault();
+			//if new AlbumName is not null or undefined, set the name to be selected
+			this.selectedAlbum= this.newAlbumName!==undefined && this.newAlbumName.trim()!== ''? this.newAlbumName.trim(): this.selectedAlbum;
 		},
         OnFilesChange:function(){
             preview.SetPreviews();
@@ -40,6 +50,14 @@ var upload=new Vue({
 	},	
 	beforeMount(){
 		this.LoadAlbums();
+	},
+	mounted(){
+		document.getElementById('albumTextBox').addEventListener('keyup',function(event){
+			event.preventDefault();
+			if(event.key==='Enter'){
+				document.getElementById('albumSubmitBtn').click();
+			}
+		})
 	}
 })
 
@@ -88,8 +106,9 @@ var preview = new Vue({
 			if (index != -1) this.previewImgs.splice(index, 1);
 		},
 		UploadToFirebase: async function () {
+
 			let uploadPromise = this.previewImgs.map(async (img) => {
-				var galleryAlbum = "Family";
+				var galleryAlbum = document.querySelector("#albumToUpload").innerText;
 
 				img.uploadError = false;
 				img.imgUploading = true;

@@ -53,26 +53,22 @@
             </div>
             <div class="input-group-append">
                 <div class="btn-group">
-                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="albumToUpload">
                       {{selectedAlbum}}
                     </button>
                     <div class="dropdown-menu">
                         <!-- <a class="dropdown-item" href="#">albumName</a>
                         <a class="dropdown-item" href="#">ds</a> -->
-                      <a v-for="albumName in albumNames" class="dropdown-item" @click="OnAlbumChange(albumName)">{{albumName}}</a>
+                        <label class="dropdown-header font-weight-bold">Existing Albums:</label>
+                        <a v-for="albumName in albumNames" class="dropdown-item" @click="OnAlbumChange(albumName, $event)">{{albumName}}</a>
                       
-                      <div class="dropdown-divider "></div>
-
-                      
-                      <form class="dropdown-item">
-                        <div class="form-group right-inner-addon">
-                          <label for="newAlbumInput" id="newAlbumLabel" class="font-weight-bold col-form-label">Create New Album:</label>
-                            <input type="text" class="form-control form-control-sm" id="newAlbumInput">
-                            <img role="img" src="../shared/bootstrap_icons/arrow-up-circle.svg" />
-                        </div>
+                        <div class="dropdown-divider "></div>
                         
-                      </form>
-
+                        <label class="dropdown-header font-weight-bold">Create New Album:</label>
+                            <div class="dropdown-item form-group right-inner-addon">
+                                <input type="text" id="albumTextBox" class="form-control form-control-sm" id="newAlbumInput" v-model="newAlbumName" >
+                                <img role="img" id="albumSubmitBtn" src="../shared/bootstrap_icons/arrow-up-circle.svg" @click="OnAddingNewAlbumClick($event)" />
+                            </div>
                     </div>
                   </div>
                 <button class="btn btn-outline-success" id="btnUpload" type="submit" @click="SubmitClicked()">Upload</button>
