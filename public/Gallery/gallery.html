@@ -21,16 +21,20 @@
     <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-storage.js"></script>
-    
+
     <!--Vue file-->
     <script src="../shared/js/Vue/vue.js"></script>
+
+    <!-- Transition / Animation Thrid Party-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 
     <!-- Navigation Bar -->
     <script type="module" src="../shared/navigation-bar/navigation-vue.js"></script>
     <link rel="stylesheet" href="../shared/navigation-bar/navigationbar.css">
-    
+
     <!--Google Icons-->
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
+
 
 </head>
 
@@ -44,6 +48,9 @@
     <div id="container">
 
         <h4>Upload Images</h4>
+
+
+        <!-- Upload Section, A set of components to open files and upload -->
         <section id="uploadSection" class="input-group">
 
             <div class="custom-file">
@@ -53,74 +60,100 @@
             </div>
             <div class="input-group-append">
                 <div class="btn-group">
-                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="albumToUpload">
-                      {{selectedAlbum}}
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" id="albumToUpload">
+                        {{selectedAlbum}}
                     </button>
                     <div class="dropdown-menu">
-                        <!-- <a class="dropdown-item" href="#">albumName</a>
-                        <a class="dropdown-item" href="#">ds</a> -->
                         <label class="dropdown-header font-weight-bold">Existing Albums:</label>
-                        <a v-for="albumName in albumNames" class="dropdown-item" @click="OnAlbumChange(albumName, $event)">{{albumName}}</a>
-                      
+                        <a v-for="albumName in albumNames" class="dropdown-item"
+                            @click="OnAlbumChange(albumName, $event)">{{albumName}}</a>
+
                         <div class="dropdown-divider "></div>
-                        
+
                         <label class="dropdown-header font-weight-bold">Create New Album:</label>
-                            <div class="dropdown-item form-group right-inner-addon">
-                                <input type="text" id="albumTextBox" class="form-control form-control-sm" id="newAlbumInput" v-model="newAlbumName" >
-                                <img role="img" id="albumSubmitBtn" src="../shared/bootstrap_icons/arrow-up-circle.svg" @click="OnAddingNewAlbumClick($event)" />
-                            </div>
+                        <div class="dropdown-item form-group right-inner-addon">
+                            <input type="text" id="albumTextBox" class="form-control form-control-sm" id="newAlbumInput"
+                                v-model="newAlbumName">
+                            <img role="img" id="albumSubmitBtn" src="../shared/bootstrap_icons/arrow-up-circle.svg"
+                                @click="OnAddingNewAlbumClick($event)" />
+                        </div>
                     </div>
-                  </div>
-                <button class="btn btn-outline-success" id="btnUpload" type="submit" @click="SubmitClicked()">Upload</button>
+                </div>
+                <button class="btn btn-outline-success" id="btnUpload" type="submit"
+                    @click="SubmitClicked()">Upload</button>
             </div>
         </section>
 
         <br />
 
-        <section id="previewSection" class="flex-list-center previewVue" v-if="previewImgs.length">
-            <div v-for="previewImg in previewImgs" :key="previewImg.imgUrl" class="previewDivs"
-                v-bind:id="previewImg.id">
-                <img class="previewDelete" src="../shared/icons/delete.png" @click="RemovePreview($event)">
-                <img v-bind:src="previewImg.imgUrl" v-bind:title="previewImg.name" class="img-thumbnail imgs">
-                <div v-if="previewImg.imgUploading" class="spinnerContainer">
-                    <div v-if="!previewImg.uploadError" class="spinner"></div>
-                    <p v-if="!previewImg.uploadError">{{previewImg.uploadProgress}}%</p>
-                    <p v-if="previewImg.uploadError" class="errorMsg">Error Uploading</p>
+
+        <!-- Preview Section, use to show all the images that user choose to, but before upload -->
+        <section id="previewSection">
+            <transition name="custom-classes-transition" enter-active-class="animate__animated animate__fadeIn"
+                leave-active-class="animate__animated animate__fadeOut" :duration="400">
+
+                <div id="previewDiv" class="flex-list flex-list-spaceBtw" v-if="previewImgs.length">
+                    <div v-for="previewImg in previewImgs" :key="previewImg.imgUrl" class="previewDivs"
+                        v-bind:id="previewImg.id">
+                        <img class="previewDelete" src="../shared/icons/delete.png" @click="RemovePreview($event)">
+                        <img v-bind:src="previewImg.imgUrl" v-bind:title="previewImg.name" class="img-thumbnail imgs">
+                        <div v-if="previewImg.imgUploading" class="spinnerContainer">
+                            <div v-if="!previewImg.uploadError" class="spinner"></div>
+                            <p v-if="!previewImg.uploadError">{{previewImg.uploadProgress}}%</p>
+                            <p v-if="previewImg.uploadError" class="errorMsg">Error Uploading</p>
+                        </div>
+                    </div>
                 </div>
 
-            </div>
+            </transition>
         </section>
 
         <br />
-
-        <!-- <section id="gallerySection" class="flexContainer">
-            <div v-for="galleryImg in galleryImgs" :key="galleryImg.id" v-bind:id="galleryImg.id">
-                <img v-bind:src="galleryImg.imgUrl" class="img-thumbnail imgs">
-            </div>
-        </section> -->
 
         <h4>Your Gallery Albums</h4>
-        <section id="galleryAlbumSection" class="flex-list-center">
-            <div v-for="album in albums" :key="album.albumName" v-bind:id="album.albumName" class="flex-column-1 albumDiv" @click="OpenAlbum(album.albumName, $event)">
-                <div class="albumCoverImgsContainer">
-                    <div class="albumNameContainer">
-                        <p class="albumName">{{album.albumName}}</p>
-                        <p class="albumImgNum" v-if="album.imgNum">{{album.imgNum}}</p>
-                    </div>
-                    <img v-bind:src="album.albumImgCover" class="img-thumbnail albumCoverImgs" alt="Image Could Not Load..." onerror="this.src='../shared/images/no_image_yet.png'">
-                </div>
-                <div class="border-bottom"></div>
-                <p>{{album.albumDate}}</p>
-                <p>{{album.albumDescription}}</p>
-                
-                <div v-show="album.isShowingImages">
-                    <div v-for="albumImage in album.albumImages" :key="albumImage.id" v-bind:id="albumImage.id">
-                        <img v-bind:src="albumImage.imgUrl" class="img-thumbnail imgs">
-                    </div>
-                </div>
 
-            </div>
+        <!-- Gallery Section, Composed to Album and Album Images Sections -->
+        <section id="galleryAlbumSection" class="flex-column-1">
+            <!-- Album Section, to show all albums. Will be hidden when an album is clicked to view sub images -->
+            <transition name="custom-classes-transition" enter-active-class="animate__animated animate__backInLeft"
+                leave-active-class="animate__animated animate__backOutLeft" tag="div"
+                :duration="{enter: 1000, leave:200}">
 
+                <section id="album" v-show="showComponent === 'album'" class="flex-list flex-list-start">
+                    <div v-for="album in albums" :key="album.albumName" v-bind:id="album.albumName"
+                        class="flex-column-1 albumDiv " @click="ShowImages(album.albumName, $event)">
+                        <div class="albumCoverImgsContainer">
+                            <div class="albumNameContainer">
+                                <p class="albumName">{{album.albumName}}</p>
+                                <p class="albumImgNum" v-if="album.imgNum">{{album.imgNum}}</p>
+                            </div>
+                            <img v-bind:src="album.albumImgCover" class="img-thumbnail albumCoverImgs"
+                                alt="Image Could Not Load..." onerror="this.src='../shared/images/no_image_yet.png'">
+                        </div>
+                        <div class="border-bottom"></div>
+                        <p>{{album.albumDate}}</p>
+                        <!-- <p>{{album.albumDescription}}</p> -->
+
+                    </div>
+                </section>
+            </transition>
+
+            <!-- Album Images Section, Appears After clicked on a album -->
+            <transition name="custom-classes-transition" enter-active-class="animate__animated animate__backInRight"
+                leave-active-class="animate__animated animate__backOutRight" :duration="{enter:1000,leave:200}">
+
+                <section id="albumImage" v-show="showComponent === 'albumImages'" style="width:100%">
+                    <a class="material-icons" @click="showComponent = 'album'" style="cursor: pointer;">
+                        arrow_back_ios
+                    </a>
+                    <div class="albumImageDiv flex-list flex-list-spaceBtw">
+                        <div v-for="albumImage in Selected_Album_Images" :key="albumImage.id" v-bind:id="albumImage.id">
+                            <img v-bind:src="albumImage.imgUrl" class="img-thumbnail imgs">
+                        </div>
+                    </div>
+                </section>
+                </transition-group>
         </section>
 
     </div>
@@ -130,7 +163,7 @@
 
 
     <!-- Vue JS -->
-    <script type="module"  src="gallery-vue.js"></script>
+    <script type="module" src="gallery-vue.js"></script>
 
 </body>
 

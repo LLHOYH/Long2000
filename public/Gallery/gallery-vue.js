@@ -1,10 +1,9 @@
 import { firestore, storage } from "../shared/firebase/firebase-key.js";
-
+import  GalleryComponent  from "../Gallery/gallery-component.js";
 var storageRef = storage.ref();
 var galleryCollection = firestore.collection("gallery");
 
 const sub_collection="Images";
-
 var albumNames=[];
 var selectedAlbum;
 var newAlbumName;
@@ -14,7 +13,7 @@ var upload=new Vue({
 	data:{
 		albumNames,
 		selectedAlbum,
-		newAlbumName
+		newAlbumName,
 	},
     methods:{
 
@@ -36,7 +35,7 @@ var upload=new Vue({
 			this.selectedAlbum=albumName;
 		},
 		OnAddingNewAlbumClick:function(event){
-			console.log(this.newAlbumName.trim());
+			console.log(typeof(this.newAlbumName.trim()));
 			event.preventDefault();
 			//if new AlbumName is not null or undefined, set the name to be selected
 			this.selectedAlbum= this.newAlbumName!==undefined && this.newAlbumName.trim()!== ''? this.newAlbumName.trim(): this.selectedAlbum;
@@ -135,6 +134,17 @@ var preview = new Vue({
 					},
 					async function () {
 						// Handle successful uploads on complete
+
+						//if the images are going to upload into a new album, set the fields in the new album
+						let field = await galleryCollection.doc(galleryAlbum).get().then((field)=>{
+							return field.data();
+						})
+						if(field===undefined)
+							await galleryCollection.doc(galleryAlbum).set({
+									AlbumDate: new Date(),
+									AlbumDescription:''
+							})
+						
 						//upload the image path to firestore
 						await galleryCollection.doc(galleryAlbum).collection(sub_collection).doc().set({
 								imgPath: imgPath,
@@ -150,12 +160,21 @@ var preview = new Vue({
 	},
 });
 
-var albums=[];
 
+
+var albums=[];
+var albumImages=[];
+var clickedAlbumNames=[];
+var selectedAlbumName;
+var showComponent='album';
 var gallery = new Vue({
 	el: "#galleryAlbumSection",
 	data: {
-		albums: albums
+		albums,
+		albumImages,
+		selectedAlbumName,
+		clickedAlbumNames,
+		showComponent
 	},
 	methods: {
 		GetAllGalleryAlbums: function () {
@@ -166,10 +185,9 @@ var gallery = new Vue({
 					//get in deeper into the album and retrieve the image in the album
 					let [imagePath, imgNum] = await galleryCollection.doc(doc.id).collection(sub_collection)
                             .get().then(result=>{
-								if(result.docs.length===0){
-									console.log("return null");
+								if(result.docs.length===0)
 									return [null,null];
-								}
+								
 
 								//return the latest image in the album as a cover image and number of images in an album using array destructuring
 								let imgPath=result.docs[result.docs.length-1].data().imgPath;
@@ -185,44 +203,39 @@ var gallery = new Vue({
 						//if image path is null, use default images.
 						let coverImgUrl = imagePath!==null ? await storageRef.child(imagePath).getDownloadURL() : "../shared/images/no_image_yet.png";
 						
-                            
-					albums.push({
+							
+						let albumDate = doc.data().AlbumDate.toDate();
+
+					this.albums.push({
                         albumName: doc.id,
-                        albumDate: doc.data().AlbumDate,
+                        albumDate: albumDate.getFullYear()+'/'+(albumDate.getMonth()+1)+'/'+albumDate.getDate(),
                         albumDescription: doc.data().AlbumDescription,
 						albumImgCover:coverImgUrl,
 						isShowingImages:false,
-						albumImages:[],
+						//albumImages:[],
 						imgNum
-                    });
+					});
 				});
 			});
 		},
-		OpenAlbum:function(albumName, event){//return all images in the album as a cover image
+		ShowImages(albumName,event){
 			if(event)
 				event.preventDefault();
-
-			//first, check if this current clicked album was already clicked by checking if it is showing it's album images.
-			var selectedAlbum = albums.find(album=>album.albumName===albumName);
-			//if it's album images are showing, end current function
-			if(selectedAlbum.isShowingImages)
-				return false;
-
-			//make the clicked album's detail show
-			selectedAlbum.isShowingImages=true;
-
-			//and change other album's that are showing to not showing by using filter
-			albums.filter(album=>album.isShowingImages && album.albumName!==albumName).forEach(album=>{album.isShowingImages=false;});
-			
-			//right now check if album already has contained albumImages
-			//if yes, end the function
-			if(selectedAlbum.albumImages.length>0)
-				return false;
-
-			//if not, get albumImages from firebase
-			galleryCollection.doc(albumName).collection(sub_collection).onSnapshot(snapshot=>{
-				console.log(snapshot.docChanges())
 				
+			if(this.selectedAlbumName!==albumName)
+				this.selectedAlbumName=albumName;
+
+				this.showComponent='albumImages';
+
+				//check if this album has already been clicked before and is stored in the clickedAlbumNames array
+			if(this.clickedAlbumNames.includes(albumName)) 
+  				return; //end current function if yes.
+
+
+			//if does not include, add it to the array and request for following images
+			this.clickedAlbumNames.push(albumName);
+			galleryCollection.doc(albumName).collection(sub_collection).onSnapshot(snapshot=>{
+						
 				//loop through each document
 				//use docChanges() instead of just doc.
 				//docChanges returns new changes to the firebase
@@ -236,44 +249,36 @@ var gallery = new Vue({
 					
 					if(change.type==="added"){
 						//and use the firebase storage's item downloadable link to render the img.
-						selectedAlbum.albumImages.push({
+						this.albumImages.push({
 							id: change.doc.id,
-							imgUrl: imgUrl
+							imgUrl: imgUrl,
+							albumName:albumName
 						});
 					}
 					else if(change.type==="modified"){
-						let modifiedImg = selectedAlbum.albumImages.find(img=>img.id===change.doc.id);
+						let modifiedImg = this.albumImages.find(img=>img.id===change.doc.id);
 						modifiedImg.imgUrl=imgUrl;
 					}
 					else if(change.type==="removed"){
-						selectedAlbum.albumImages.splice(selectedAlbum.albumImages.findIndex(img=>img.id), 1);
+						this.albumImages.splice(this.albumImages.findIndex(img=>img.id), 1);
 					}
 				})
 			})
 		}
 	},
+	computed:{
+		Selected_Album_Images(){
+			let filteredImgs=[]
+			this.albumImages.forEach((img)=>{
+				if(img.albumName === this.selectedAlbumName)
+				filteredImgs.push(img);
+			})
+			return filteredImgs;
+			//return this.albumImages.filter(img=>{ img.albumName === this.selectedAlbumName });
+		}
+	},
 	beforeMount() {
 		this.GetAllGalleryAlbums();
-	},
+	}
 });
 
-
-
-
-
-
-
-
-// function DownloadImageWithUrl(url) {
-//     // This can be downloaded directly:
-// 	var xhr = new XMLHttpRequest();
-//     xhr.responseType = "blob";
-    
-// 	xhr.onload = function (event) {
-//         var blob = xhr.response;
-//         console.log(blob);
-//     };
-//     xhr.open("GET", url);
-// 	xhr.send();
-// 	return url;
-// }

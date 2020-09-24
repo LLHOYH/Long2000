@@ -9,6 +9,10 @@
         width:500px;
         height:500px;
     }
+    .flex-list-start{
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
 }
 
 @media screen and (min-width: 600px) and (max-width: 1200px) {
@@ -21,32 +25,57 @@
     .albumCoverImgsContainer{
         width:500px;
     }
-
+    .flex-list-start{
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
 }
+
 @media screen and (max-width: 600px) {
     .imgs{
-        max-width: 220px;
+        max-width: 160px;
     }
     .albumCoverImgsContainer{
-        width:90%;
+        width:100%;
+    }
+    .flex-list-start{
+        justify-content: center;
+        align-items: center;
     }
 
 }
-@media screen and (max-width: 375px) {
+/* @media screen and (max-width: 376px) {
     .imgs{
-        max-width: 178px;
+        max-width: 160px;
     }
-}
+    .flex-list-start{
+        justify-content: center;
+        align-items: center;
+    }
+} */
 
-.flex-list-center {
+.flex-list {
     width: 100%;
     height: auto;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    align-content: center;
+}
+
+.flex-list-center{
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-list-start{
     justify-content: flex-start;
     align-items: flex-start;
-    align-content: flex-start;
+}
+
+.flex-list-spaceBtw{
+    justify-content: space-evenly;
+    align-items: flex-start;
 }
 
 .flex-column-1{
@@ -64,8 +93,8 @@
     margin: 2%;
 }
 
-#previewSection {
-    background-color: #ebebeb;
+#previewDiv {
+    background-image: linear-gradient(140deg, #EADEDB 0%, #8adea0, #32a852, #8adea0  75%);
     border-top: 0.4px solid black;
     border-bottom: 0.4px solid black;
     padding-bottom: 20px;
@@ -81,15 +110,20 @@
 
 .previewDelete {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 18px;
-    height: 18px;
+    top: 10px;
+    right: 10px;
+    width: 23px;
+    height: 23px;
     opacity: 0.7;
+    -webkit-transition: all 0.3s ease-in;
+    -moz-transition: all 0.3s ease-in;
+    -o-transition: all 0.3s ease-in;
+    transition: all 0.3s ease-in;
 }
 
 .previewDelete:hover {
-    background-color: gray;
+    width: 30px;
+    height: 30px;
 }
 
 .imgs {
@@ -160,7 +194,9 @@
     }
 }
 
-
+.true{
+    align-self: flex-end;
+}
 
 /* Upload Section Css */
 .dropdown-input{
@@ -188,11 +224,15 @@
 
 
 
-
 /* Album Section Css */
+
+#galleryAlbumSection{
+    position: relative;
+}
+ 
 .albumDiv{
-    margin: 20px 40px 20px 0;
-    padding:3px;
+    margin: 20px;
+    padding:15px 3px 3px 3px;
     border:0.7px solid #5fb37f;
     border-radius: 3px;
 
@@ -213,9 +253,6 @@
         content:"";
         padding-bottom: 100%;
     }
-
-
-
 
 .albumNameContainer{
     position: absolute;
@@ -247,3 +284,41 @@
         font-size: 1.2em;
         text-align: center;
     }
+
+.albumImageDiv{
+    overflow: hidden;
+}
+
+#album, #albumImages{
+    position: absolute;
+    top:0;
+    left:0;
+}
+
+
+
+/* Vue Transition */
+.toggle-enter-active, .toggle-leave-active {
+    transition: 1s ease-out;
+ }
+
+ /*
+css property it will be when transition starts
+*/
+ .toggle-enter, .toggle-leave-to {
+    overflow: hidden;
+    max-height: 0;
+ }
+ 
+/*
+css property it will be when transition ends
+*/
+.toggle-enter-to, .toggle-leave {
+    max-height: 400px;
+    overflow: hidden;
+ }
+
+
+/* .toggle-enter-to, .toggle-leave {
+    height: 0;
+} */
